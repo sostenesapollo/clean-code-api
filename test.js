@@ -1,6 +1,5 @@
-
-function teste () {
-  console.log('ok')
+        function teste () {
+    console.log('ok')
 }
 
 teste()

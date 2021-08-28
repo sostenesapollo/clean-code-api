@@ -1,12 +1,35 @@
 class LoginRouter {
   route (httpRequest) {
-    if (!httpRequest || !httpRequest.body) return { statusCode: 400 }
+    if (!httpRequest || !httpRequest.body) return httpResponse.serverError()
     const { email, password } = httpRequest.body
-    if (!email || !password) {
-      return {
-        statusCode: 400
-      }
+    if (!email) {
+      return httpResponse.badRequest('email')
     }
+    if (!password) {
+      return httpResponse.badRequest('password')
+    }
+  }
+}
+
+class httpResponse {
+  static badRequest (paramName) {
+    return {
+      statusCode: 400,
+      body: new MissingParamError(paramName)
+    }
+  }
+
+  static serverError () {
+    return {
+      statusCode: 500
+    }
+  }
+}
+
+class MissingParamError extends Error {
+  constructor (paramName) {
+    super(`Missing param : ${paramName}`)
+    this.name = 'MissingParamError'
   }
 }
 
@@ -21,6 +44,7 @@ describe('Login Router', () => {
 
     const httpResponse = sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new MissingParamError('email'))
   })
 
   test('Should return 400 if no password is provided', () => {
@@ -28,23 +52,25 @@ describe('Login Router', () => {
     const httpRequest = {
       body: {
         email: 'any_email@gmail.com'
+        // password: '1234'
       }
     }
 
     const httpResponse = sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new MissingParamError('password'))
   })
 
-  test('Should return 400 if no httpRequest is provided', () => {
+  test('Should return 500 if no httpRequest is provided', () => {
     const sut = new LoginRouter()
     const httpResponse = sut.route()
-    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.statusCode).toBe(500)
   })
 
-  test('Should return 400 if httpRequest has no body', () => {
+  test('Should return 500 if httpRequest has no body', () => {
     const sut = new LoginRouter()
     const httpRequest = {}
     const httpResponse = sut.route(httpRequest)
-    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.statusCode).toBe(500)
   })
 })

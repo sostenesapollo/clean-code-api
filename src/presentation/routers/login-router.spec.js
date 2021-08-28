@@ -16,7 +16,8 @@ describe('Login Router', () => {
         password: 'password'
       }
     }
-
+    const a = 1
+    console.log(a)
     const httpResponse = sut.route(httpRequest)
     expect(httpResponse.statusCode).toBe(400)
   })
